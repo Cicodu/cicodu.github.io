@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Hanoi Kuleleri</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #0f0c1a;
+      --surface: #1a1630;
+      --surface2: #221d3a;
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --gold: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --ok: #10b981;
+      --err: #ef4444;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, .18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, .12) 0%, transparent 50%);
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ── INTRO ── */
+    #sIntro {
+      min-height: 100vh;
+      justify-content: center;
+      background-image: radial-gradient(ellipse at 30% 60%, rgba(124, 58, 237, .25) 0%, transparent 60%);
+    }
+
+    .intro-card {
+      background: var(--surface);
+      border: 1px solid rgba(124, 58, 237, .4);
+      border-radius: 28px;
+      padding: 36px 32px 32px;
+      width: min(92vw, 370px);
+      text-align: center;
+      box-shadow: 0 0 80px rgba(124, 58, 237, .25);
+      animation: slideUp .6s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(40px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .intro-icon {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 8px;
+      animation: wiggle 3s ease-in-out infinite;
+    }
+
+    @keyframes wiggle {
+
+      0%,
+      100% {
+        transform: rotate(-4deg) scale(1)
+      }
+
+      50% {
+        transform: rotate(4deg) scale(1.08)
+      }
+    }
+
+    .intro-title {
+      font-size: 1.9rem;
+      font-weight: 900;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .intro-sub {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .intro-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-align: left;
+      margin-bottom: 5px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    .intro-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(124, 58, 237, .1);
+      border: 1.5px solid rgba(124, 58, 237, .35);
+      border-radius: 13px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 16px;
+    }
+
+    .intro-input:focus {
+      border-color: var(--accent2);
+    }
+
+    .intro-input::placeholder {
+      color: rgba(148, 163, 184, .5);
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      box-shadow: 0 4px 24px rgba(124, 58, 237, .5);
+      transition: all .2s;
+      margin-bottom: 10px;
+    }
+
+    .btn-start:active {
+      transform: scale(.97);
+    }
+
+    .btn-start:disabled {
+      background: rgba(255, 255, 255, .1);
+      color: rgba(255, 255, 255, .3);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .tut-link {
+      display: block;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(124, 58, 237, .35);
+      color: #a855f7;
+      font-size: .88rem;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: background .2s;
+      cursor: pointer;
+    }
+
+    .tut-link:hover {
+      background: rgba(124, 58, 237, .12);
+    }
+
+    /* ── MODE CARDS ── */
+    .mode-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-align: left;
+      margin-bottom: 8px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    .mode-cards {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .mode-card {
+      flex: 1;
+      border-radius: 16px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all .2s;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .mode-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .mode-card.timed {
+      border-color: rgba(16, 185, 129, .4);
+      background: rgba(16, 185, 129, .08);
+    }
+
+    .mode-card.timed:hover {
+      border-color: rgba(16, 185, 129, .7);
+      background: rgba(16, 185, 129, .15);
+    }
+
+    .mode-card.timed.selected {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, .2);
+      box-shadow: 0 0 22px rgba(16, 185, 129, .5);
+    }
+
+    .mode-card.normal {
+      border-color: rgba(124, 58, 237, .4);
+      background: rgba(124, 58, 237, .08);
+    }
+
+    .mode-card.normal:hover {
+      border-color: rgba(124, 58, 237, .7);
+      background: rgba(124, 58, 237, .15);
+    }
+
+    .mode-card.normal.selected {
+      border-color: #7c3aed;
+      background: rgba(124, 58, 237, .2);
+      box-shadow: 0 0 20px rgba(124, 58, 237, .3);
+    }
+
+    .mode-card-icon {
+      font-size: 1.8rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .mode-card-name {
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .mode-card.timed .mode-card-name {
+      color: #ef4444;
+    }
+
+    .mode-card.normal .mode-card-name {
+      color: #a855f7;
+    }
+
+    /* ── CONSENT ── */
+    .consent-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .consent-box input[type="checkbox"] {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      background: rgba(124, 58, 237, .1);
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+      margin-top: 2px;
+      transition: all .2s;
+    }
+
+    .consent-box input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .consent-box input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      top: -1px;
+      left: 3px;
+    }
+
+    .consent-text {
+      font-size: .75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── TIMER BAR ── */
+    #timerBar {
+      display: none;
+      width: 100%;
+      text-align: center;
+      padding: 6px 0 2px;
+    }
+
+    #timerBar.active {
+      display: block;
+    }
+
+    .timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(239, 68, 68, .12);
+      border: 2.5px solid rgba(239, 68, 68, .7);
+      border-radius: 50px;
+      padding: 10px 32px;
+      box-shadow: 0 0 32px rgba(239, 68, 68, .4);
+      animation: timerPulse 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes timerPulse {
+      from {
+        box-shadow: 0 0 18px rgba(239, 68, 68, .25)
+      }
+
+      to {
+        box-shadow: 0 0 48px rgba(239, 68, 68, .7)
+      }
+    }
+
+    .timer-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: dotBlink 1s step-start infinite;
+    }
+
+    @keyframes dotBlink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .15
+      }
+    }
+
+    .timer-val {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #ef4444;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 3px;
+      line-height: 1;
+    }
+
+
+    /* ── TUTORIAL ── */
+    #sTutorial {
+      padding-top: 16px;
+    }
+
+    .tut-header {
+      text-align: center;
+      padding: 10px 16px 8px;
+      width: 100%;
+      position: relative;
+    }
+
+    .tut-header h1 {
+      font-size: clamp(1.2rem, 4vw, 1.7rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #7c3aed, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tut-back {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Outfit', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .07);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .step-pills {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      padding: 6px 0 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      width: 28px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .1);
+      transition: background .3s;
+    }
+
+    .pill.done {
+      background: var(--ok);
+    }
+
+    .pill.active {
+      background: var(--gold);
+    }
+
+    .instr-box {
+      width: min(92vw, 640px);
+      background: var(--surface);
+      border: 1.5px solid rgba(124, 58, 237, .35);
+      border-radius: 18px;
+      padding: 14px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .3);
+      min-height: 56px;
+    }
+
+    .instr-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      line-height: 1
+    }
+
+    .instr-text {
+      flex: 1
+    }
+
+    .instr-ttl {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin-bottom: 2px;
+    }
+
+    .instr-body {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .instr-sub {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .canvas-wrap {
+      width: min(94vw, 700px);
+      background: var(--surface);
+      border: 1px solid rgba(124, 58, 237, .22);
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: 0 0 40px rgba(124, 58, 237, .15);
+    }
+
+    #tutCanvas {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+      background: var(--surface2);
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .feedback {
+      text-align: center;
+      font-size: .9rem;
+      font-weight: 600;
+      min-height: 24px;
+      padding: 4px 0 8px;
+      transition: color .2s;
+    }
+
+    .feedback.ok {
+      color: var(--ok);
+    }
+
+    .feedback.err {
+      color: var(--err);
+    }
+
+    /* ── GAME ── */
+    #sGame header {
+      width: 100%;
+      padding: 14px 22px 6px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .player-tag {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--accent2);
+      background: rgba(124, 58, 237, .15);
+      border-radius: 10px;
+      padding: 5px 13px;
+      border: 1px solid rgba(124, 58, 237, .25);
+    }
+
+    .game-title {
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #7c3aed, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      cursor: default;
+      user-select: none;
+    }
+
+    .menu-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .07);
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .menu-btn-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background: rgba(239, 68, 68, .35);
+      transition: none;
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    .menu-btn.holding .menu-btn-fill {
+      width: 100%;
+      transition: width 3s linear;
+    }
+
+    .hint-bar {
+      text-align: center;
+      padding: 3px 0 5px;
+      font-size: .83rem;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .hint-bar.sel {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .game-wrap {
+      width: 100%;
+      max-width: 900px;
+      padding: 6px 12px 0;
+      flex: 1;
+    }
+
+    #gameCanvas {
+      border-radius: 20px;
+      display: block;
+      margin: 0 auto;
+      touch-action: none;
+      box-shadow: 0 0 60px rgba(124, 58, 237, .22), 0 0 0 1px rgba(124, 58, 237, .18);
+      background: var(--surface);
+      cursor: pointer;
+      max-width: 100%;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding: 12px 12px 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn-prim {
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, .45);
+    }
+
+    .btn-prim:active {
+      transform: scale(.96);
+    }
+
+    .btn-sec {
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .07);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .btn-sec:active {
+      transform: scale(.96);
+    }
+
+    /* ── WIN ── */
+    #winOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 12, 26, .9);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 20px 0;
+    }
+
+    #winOverlay.show {
+      display: flex;
+      animation: fadeIn .4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .win-card {
+      background: var(--surface);
+      border: 1px solid rgba(124, 58, 237, .4);
+      border-radius: 24px;
+      padding: 28px 32px 24px;
+      text-align: center;
+      max-width: 400px;
+      width: 92%;
+      box-shadow: 0 0 60px rgba(124, 58, 237, .3);
+    }
+
+    .win-emoji {
+      font-size: 2.8rem;
+    }
+
+    .win-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-top: 6px;
+      background: linear-gradient(135deg, #a855f7, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .win-sub {
+      color: var(--muted);
+      font-size: .86rem;
+      margin-top: 4px;
+    }
+
+    .win-stats {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 14px 0;
+    }
+
+    .win-stat {
+      background: rgba(124, 58, 237, .15);
+      border-radius: 12px;
+      padding: 9px 14px;
+    }
+
+    .win-stat-v {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .win-stat-l {
+      font-size: .7rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .sb-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin: 14px 0 8px;
+    }
+
+    .sb-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .sb-table th {
+      font-size: .7rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0 8px 6px;
+    }
+
+    .sb-table th:first-child {
+      text-align: left;
+    }
+
+    .sb-table th:not(:first-child) {
+      text-align: center;
+    }
+
+    .sb-row {
+      border-top: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .sb-row.me {
+      background: rgba(124, 58, 237, .12);
+    }
+
+    .sb-row td {
+      padding: 7px 8px;
+      font-size: .85rem;
+    }
+
+    .sb-row td:first-child {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sb-row td:not(:first-child) {
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .rank.gold {
+      color: #f59e0b;
+    }
+
+    .rank.silver {
+      color: #94a3b8;
+    }
+
+    .rank.bronze {
+      color: #b45309;
+    }
+
+    .win-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .win-btns button {
+      flex: 1;
+    }
+
+    /* ── TUT WIN ── */
+    #tutWin {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 12, 26, .9);
+      backdrop-filter: blur(10px);
+      z-index: 99;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #tutWin.show {
+      display: flex;
+      animation: fadeIn .4s ease;
+    }
+
+    /* ── EXPORT ── */
+    #exportModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #exportModal.show {
+      display: flex;
+    }
+
+    .export-card {
+      background: var(--surface);
+      border: 1px solid rgba(124, 58, 237, .4);
+      border-radius: 20px;
+      padding: 26px;
+      max-width: 460px;
+      width: 92%;
+    }
+
+    .export-card h2 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--accent2);
+    }
+
+    .export-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .exp-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .export-info {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── GENDER TOGGLE ── */
+    .gender-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .gender-btn {
+      flex: 1;
+      padding: 9px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid rgba(255, 255, 255, .1);
+      background: rgba(255, 255, 255, .05);
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .gender-btn.selected {
+      border-color: var(--accent2);
+      background: rgba(124, 58, 237, .18);
+      color: var(--text);
+      box-shadow: 0 0 14px rgba(124, 58, 237, .3);
+    }
+
+    /* ── PLAYED BEFORE TOGGLE ── */
+    .played-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .played-btn {
+      flex: 1;
+      padding: 9px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid rgba(255, 255, 255, .1);
+      background: rgba(255, 255, 255, .05);
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .played-btn.selected {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, .18);
+      color: var(--text);
+      box-shadow: 0 0 14px rgba(16, 185, 129, .3);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════ INTRO ═══════════════════════ -->
+  <div id="sIntro" class="screen active">
+    <div class="intro-card">
+      <span class="intro-icon" id="introIcon">🗼</span>
+      <div class="intro-title" id="introTitle">Hanoi Kuleleri</div>
+      <div class="intro-sub">Tüm diskleri soldan sağ kuleye taşı.<br>Büyük disk küçüğün üstüne konmaz.</div>
+
+      <div class="intro-label">👤 Adınız</div>
+      <input class="intro-input" id="nameInput" type="text" placeholder="Adını yaz..." maxlength="20" />
+
+      <div class="intro-label">⚧ Cinsiyet</div>
+      <div class="gender-toggle">
+        <button class="gender-btn" id="genderM" onclick="selectGender('erkek')">♂️ Erkek</button>
+        <button class="gender-btn" id="genderF" onclick="selectGender('kadin')">♀️ Kadın</button>
+        <button class="gender-btn selected" id="genderX" onclick="selectGender('belirtmek_istemiyor')">➖ Belirtmek
+          İstemiyorum</button>
+      </div>
+
+      <div class="intro-label">🕹️ Daha önce benzer bir oyun oynadınız mı?</div>
+      <div class="played-toggle">
+        <button class="played-btn" id="playedYes" onclick="selectPlayedBefore(true)">✅ Evet</button>
+        <button class="played-btn selected" id="playedNo" onclick="selectPlayedBefore(false)">❌ Hayır</button>
+      </div>
+
+      <div class="mode-label">🎮 Mod seç</div>
+      <div class="mode-cards">
+        <div class="mode-card timed" id="cardTimed" onclick="selectMode('timed')">
+          <span class="mode-card-icon">🔵</span>
+          <div class="mode-card-name">A</div>
+        </div>
+        <div class="mode-card normal selected" id="cardNormal" onclick="selectMode('normal')">
+          <span class="mode-card-icon">🗼</span>
+          <div class="mode-card-name">B</div>
+        </div>
+      </div>
+
+      <label class="consent-box">
+        <input type="checkbox" id="consentCheck"
+          onchange="document.getElementById('btnStart').disabled = !this.checked">
+        <div class="consent-text">
+          Oyun verilerimin akademik bir ödev kapsamında anonim olarak toplanmasını onaylıyorum. <strong
+            style="color:var(--text)">Kişisel kimlik bilgilerim kesinlikle paylaşılmayacaktır.</strong>
+        </div>
+      </label>
+
+      <button class="btn-start" id="btnStart" onclick="startGame()" disabled>🚀 Oyunu Başlat</button>
+      <div class="tut-link" onclick="showTutorial()">📖 Nasıl Oynanır? (Eğitim)</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ TUTORIAL ════════════════════ -->
+  <div id="sTutorial" class="screen">
+    <div class="tut-header">
+      <button class="tut-back" onclick="showScreen('sIntro')">⬅ Geri</button>
+      <h1>🗼 Hanoi Eğitimi</h1>
+    </div>
+    <div class="step-pills" id="pills"></div>
+    <div class="instr-box">
+      <div class="instr-icon" id="instrIcon">👇</div>
+      <div class="instr-text">
+        <div class="instr-ttl" id="instrTitle">ADIM 1</div>
+        <div class="instr-body" id="instrBody">Sol kuleye dokun</div>
+        <div class="instr-sub" id="instrSub">Sarı parlayan kuleye dokun</div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="tutCanvas"></canvas>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ GAME ════════════════════════ -->
+  <div id="sGame" class="screen">
+    <header>
+      <div id="timerBar">
+        <div class="timer-pill">
+          <div class="timer-dot"></div><span class="timer-val" id="timerVal">00:00</span>
+        </div>
+      </div>
+      <div class="header-top">
+        <span class="player-tag" id="playerLabel">👤 —</span>
+        <span class="game-title" id="gameTitle">🗼 Hanoi</span>
+        <button class="menu-btn" id="menuBtn" onmousedown="holdMenu()" onmouseup="releaseMenu()"
+          onmouseleave="releaseMenu()" ontouchstart="holdMenu()" ontouchend="releaseMenu()">
+          <div class="menu-btn-fill" id="menuFill"></div>
+          <span style="position:relative;z-index:1">⬅ Menü</span>
+        </button>
+      </div>
+    </header>
+    <div class="hint-bar" id="hintBar">Bir kule seçerek disk al</div>
+    <div class="game-wrap"><canvas id="gameCanvas"></canvas></div>
+    <div class="controls"></div>
+  </div>
+
+  <!-- ═══════════════════════ WIN (game) ══════════════════ -->
+  <div id="winOverlay">
+    <div class="win-card">
+      <div class="win-emoji">🏆</div>
+      <div class="win-title">Tebrikler!</div>
+      <div class="win-sub" id="winSub"></div>
+      <div class="win-stats">
+        <div class="win-stat">
+          <div class="win-stat-v" id="winMoves">-</div>
+          <div class="win-stat-l">Hamle</div>
+        </div>
+        <div class="win-stat">
+          <div class="win-stat-v" id="winTime">-</div>
+          <div class="win-stat-l">Süre</div>
+        </div>
+        <div class="win-stat">
+          <div class="win-stat-v" id="winErrors">-</div>
+          <div class="win-stat-l">Hata</div>
+        </div>
+      </div>
+      <div class="sb-title">🏅 Skor Tablosu</div>
+      <table class="sb-table">
+        <thead>
+          <tr>
+            <th>Oyuncu</th>
+            <th>Hamle</th>
+            <th>Süre</th>
+          </tr>
+        </thead>
+        <tbody id="sbBody"></tbody>
+      </table>
+      <div class="win-btns">
+        <button class="btn-sec" onclick="goMenu();closeWin()">Menü</button>
+        <button class="btn-prim" onclick="resetGame();closeWin()">Tekrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ WIN (tutorial) ══════════════ -->
+  <div id="tutWin">
+    <div class="win-card">
+      <div class="win-emoji">🏆</div>
+      <div class="win-title">Eğitim Tamam!</div>
+      <div class="win-sub" style="margin-bottom:20px">Tüm hareketleri öğrendin!<br>Ana menüden oyunu başlatabilirsin.</div>
+      <button class="btn-prim" style="width:100%" onclick="startGameFromTutorial()">🏠 Ana Menüye Dön</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ EXPORT (gizli 7x tıkla) ═════ -->
+  <div id="exportModal">
+    <div class="export-card">
+      <h2>📊 Araştırmacı Paneli</h2>
+      <div class="export-info" id="exportInfo">—</div>
+      <div class="export-btns">
+        <button class="exp-btn" style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none"
+          onclick="dlJSON()">⬇ JSON</button>
+        <button class="exp-btn" style="background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;border:none"
+          onclick="dlCSV()">⬇ CSV</button>
+        <button class="exp-btn" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)"
+          onclick="clearData()">🗑 Temizle</button>
+        <button class="exp-btn btn-sec"
+          onclick="document.getElementById('exportModal').classList.remove('show')">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // ══════════════════════════════════════════════════════════
+    //  SCREEN ROUTER
+    // ══════════════════════════════════════════════════════════
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  LOCAL STORAGE
+    // ══════════════════════════════════════════════════════════
+    const LS_KEY = 'hanoi_sessions';
+    function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
+    function lsSave(arr) { try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); } catch { } }
+
+    // ══════════════════════════════════════════════════════════
+    //  SECRET EXPORT (gizli: başlığa 7x tıkla)
+    // ══════════════════════════════════════════════════════════
+    let titleTaps = 0, titleTapTimer = null;
+    ['introTitle', 'gameTitle'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        titleTaps++; clearTimeout(titleTapTimer);
+        if (titleTaps >= 7) { titleTaps = 0; openExport(); return; }
+        titleTapTimer = setTimeout(() => { titleTaps = 0; }, 2000);
+      });
+    });
+
+    // Kule emojisine 5 kere tıklayınca skor tablosunu (export paneli) aç
+    let iconTaps = 0, iconTapTimer = null;
+    document.getElementById('introIcon').addEventListener('click', () => {
+      iconTaps++; clearTimeout(iconTapTimer);
+      if (iconTaps >= 5) { iconTaps = 0; openExport(); return; }
+      iconTapTimer = setTimeout(() => { iconTaps = 0; }, 2000);
+    });
+
+    // ══════════════════════════════════════════════════════════
+    //  CHEAT CODE: klavye 3→1 → size kısıtı kaldır
+    // ══════════════════════════════════════════════════════════
+    let cheatMode = false, cheatSeq = '';
+    document.addEventListener('keydown', e => {
+      cheatSeq = (cheatSeq + e.key).slice(-2);
+      if (cheatSeq === '31') { cheatMode = !cheatMode; cheatSeq = ''; }
+    });
+
+    // ══════════════════════════════════════════════════════════
+    //  INTRO
+    // ══════════════════════════════════════════════════════════
+    let playerName = '';
+    let timedMode = false;  // true = kronometreli mod
+    let timerInterval = null;
+
+    function selectMode(mode) {
+      timedMode = (mode === 'timed');
+      document.getElementById('cardTimed').classList.toggle('selected', timedMode);
+      document.getElementById('cardNormal').classList.toggle('selected', !timedMode);
+    }
+    // Default: normal seçili
+    selectMode('normal');
+
+    function showTutorial() {
+      showScreen('sTutorial');
+      tutInit();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      const el = document.getElementById('timerVal');
+      timerInterval = setInterval(() => {
+        if (gameWon) { clearInterval(timerInterval); return; }
+        const ms = Date.now() - gameStart;
+        const m = Math.floor(ms / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        const cs = Math.floor((ms % 1000) / 10);
+        el.textContent =
+          String(m).padStart(2, '0') + ':' +
+          String(s).padStart(2, '0') + '.' +
+          String(cs).padStart(2, '0');
+      }, 50);
+    }
+
+    // Cinsiyet seçimi
+    let selectedGender = 'belirtmek_istemiyor';
+    function selectGender(g) {
+      selectedGender = g;
+      document.getElementById('genderM').classList.toggle('selected', g === 'erkek');
+      document.getElementById('genderF').classList.toggle('selected', g === 'kadin');
+      document.getElementById('genderX').classList.toggle('selected', g === 'belirtmek_istemiyor');
+    }
+
+    // Daha önce benzer oyun oynamış mı durumu
+    let hasPlayedBefore = false;
+    function selectPlayedBefore(val) {
+      hasPlayedBefore = val;
+      document.getElementById('playedYes').classList.toggle('selected', val === true);
+      document.getElementById('playedNo').classList.toggle('selected', val === false);
+    }
+
+    // Kullanıcının adını oluşturur
+    function buildPlayerName() {
+      const name = document.getElementById('nameInput').value.trim();
+      return name || ('Anon-' + Math.random().toString(36).slice(2, 6).toUpperCase());
+    }
+
+    // Oyunu başlatan ana fonksiyon
+    function startGame() {
+      // 1. Oyuncu ismini belirle ve üst panele yaz
+      playerName = buildPlayerName();
+      document.getElementById('playerLabel').textContent = '👤 ' + playerName;
+
+      // 2. Kronometre modundaysak zaman çubuğunu görünür yap
+      document.getElementById('timerBar').classList.toggle('active', timedMode);
+
+      // 3. Oyun ekranına geç
+      showScreen('sGame');
+
+      // 4. Canvas (çizim alanı) boyutunu ekran genişliğine göre ayarla
+      resizeGameCanvas();
+
+      // 5. Oyundaki kuleleri ve diskleri sıfırla/hazırla
+      initGame();
+
+      // 6. Eğer süreli mod seçildiyse sayacı başlat
+      if (timedMode) startTimer();
+    }
+
+    // Eğitim (Tutorial) sonrasında ana menüye dönen fonksiyon
+    function startGameFromTutorial() {
+      // Önce eğitim sonundaki tebrik penceresini gizle
+      document.getElementById('tutWin').classList.remove('show');
+
+      // Eğitim animasyon döngüsünü durdur
+      cancelAnimationFrame(tutRAF);
+      tutRAF = null;
+
+      // Ana menü ekranına dön
+      showScreen('sIntro');
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ANA MENÜYE DÜŞME VE BASILI TUTMA MANTIĞI
+    // ══════════════════════════════════════════════════════════
+
+    let menuHoldTimer = null; // Butona basılı tutmayı sayan zamanlayıcı
+
+    // Kullanıcı "Menü" butonuna basılı tutmaya başladığında
+    function holdMenu() {
+      const btn = document.getElementById('menuBtn');
+      btn.classList.add('holding'); // Kırmızı dolum animasyonunu tetikler
+
+      // 3 saniye sonra menüye dön (goMenu) işlemini gerçekleştir
+      menuHoldTimer = setTimeout(() => {
+        btn.classList.remove('holding');
+        goMenu();
+      }, 3000);
+    }
+
+    // Kullanıcı parmağını butondan çekerse zamanlayıcıyı iptal et
+    function releaseMenu() {
+      clearTimeout(menuHoldTimer);
+      const btn = document.getElementById('menuBtn');
+      btn.classList.remove('holding'); // Dolum animasyonunu sıfırla
+    }
+
+    // Oyunu tamamen iptal edip giriş ekranına (Intro) dönme
+    function goMenu() {
+      closeWin(); // Eğer kazandıysak açık olan pencereyi kapat
+
+      // Animasyonları ve sayacı mutlaka durdur, arkada çalışmasın
+      cancelAnimationFrame(gameFrame);
+      gameFrame = null;
+      clearInterval(timerInterval);
+
+      document.getElementById('timerBar').classList.remove('active');
+      document.getElementById('timerVal').textContent = '00:00.00';
+
+      showScreen('sIntro'); // İlk baştaki menüyü aç
+      titleTaps = 0; // Hile kodu tıklama sayacını sıfırla
+    }
+
+
+    // ══════════════════════════════════════════════════════════
+    //  TUTORIAL (EĞİTİM EKRANI)
+    // ══════════════════════════════════════════════════════════
+
+    const SOLUTION = []; // Eğitimdeki 3 diskli örneğin çözüm adımlarını tutar
+
+    // Özyinelemeli (Recursive) fonksiyon ile 3 diskli Hanoi çözümünü (adım adım) heapliyoruz.
+    // Orijinal Hanoi algoritmasıdır.
+    (function sol(n, f, t, v) {
+      if (!n) return; // 0 disk kaldıysa dön
+      sol(n - 1, f, v, t); // Üstteki diskleri geçici kuleye taşı
+      SOLUTION.push([n, f, t]); // Mevcut en büyük diski hedef kuleye taşı ve diziye kaydet
+      sol(n - 1, v, t, f); // Geçici kuledeki diskleri hedef kuleye taşı
+    })(3, 0, 2, 1); // f=0(sol), t=2(sağ), v=1(orta)
+
+    let tStepIdx = 0, // Eğitimde kullanıcının şu anki adım sırası
+      tPhase = 'pick', // Kullanıcı disk mi seçiyor (pick) yoksa bırakıyor mu (place)
+      tPegs = [[3, 2, 1], [], []], // Eğitim modundaki kulelerin (Pegs) başlangıç dizilişi
+      tSelected = null; // Seçilen kulenin indeksi
+
+    const PNAMES = ['Sol', 'Orta', 'Sağ'];
+    const TCOLS = [['#f59e0b', '#d97706'], ['#3b82f6', '#2563eb'], ['#a855f7', '#9333ea']]; // Disk renkleri
+
+    function tutInit() {
+      tStepIdx = 0; tPhase = 'pick'; tPegs = [[3, 2, 1], [], []]; tSelected = null;
+      // pills
+      const pe = document.getElementById('pills'); pe.innerHTML = '';
+      SOLUTION.forEach((_, i) => { const d = document.createElement('div'); d.className = 'pill'; d.id = 'pill' + i; pe.appendChild(d); });
+      tSetInstr(0, 'pick', SOLUTION[0][0], SOLUTION[0][1], SOLUTION[0][2]);
+      tResize();
+    }
+
+    const tutCanvas = document.getElementById('tutCanvas');
+    const tCtx = tutCanvas.getContext('2d');
+    function tResize() {
+      tutCanvas.width = tutCanvas.parentElement.clientWidth - 24;
+      tutCanvas.height = Math.round(tutCanvas.width * 0.4);
+    }
+    window.addEventListener('resize', () => { tResize(); });
+
+    // Eğitim ekranının saniyede ~60 kez çalışan çizim (render) döngüsü
+    let tutRAF = null;
+    function tLoop() {
+      tDraw(); // Çizimi yap
+      tutRAF = requestAnimationFrame(tLoop); // Bir sonraki karede tekrar çağır
+    }
+
+    // Döngüyü başlat
+    tLoop();
+
+    // Eğitim ekranındaki kuleleri ve diskleri Canvas üzerine çizen ana fonksiyon
+    function tDraw() {
+      const W = tutCanvas.width, H = tutCanvas.height;
+      tCtx.clearRect(0, 0, W, H); // Önceki kareyi temizle
+
+      // Arka planı koyu lacivert/mor bir gradyan ile boya
+      const bg = tCtx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#1e1a36');
+      bg.addColorStop(1, '#131020');
+      tCtx.fillStyle = bg;
+      tCtx.fillRect(0, 0, W, H);
+
+      // Çizim ölçüleri (Genişlik/Yükseklik oranlarına göre dinamik)
+      const pw = W / 3, // Her bir kule için ayrılan genişlik (ekranın 3'te 1'i)
+        bh = H * .10, // Alt taban yüksekliği
+        pt = Math.max(6, W * .013), // Direk (çubuk) kalınlığı
+        ph = H * .74, // Direk yüksekliği
+        by = H - bh; // Alt tabanın Y eksenindeki konumu
+
+      const mxDW = pw * .80, // En büyük diskin genişliği
+        mnDW = pt * 3.4, // En küçük diskin genişliği
+        dh = Math.min(26, (ph * .85) / 4), // Disk kalınlığı
+        pTopY = by - ph; // Direğin en üst noktasının Y konumu
+
+      // Kulelerin oturduğu alt platformu (taban) çiz
+      tCtx.fillStyle = '#2d2550';
+      tRR(tCtx, 12, by, W - 24, bh - 4, 8);
+      tCtx.fill();
+
+      tCtx.strokeStyle = 'rgba(124,58,237,.4)';
+      tCtx.lineWidth = 1.2;
+      tRR(tCtx, 12, by, W - 24, bh - 4, 8);
+      tCtx.stroke();
+
+      // Şu anki eğitim adımında (tStepIdx) nereden (tFrom) nereye (tTo) gidiliyor?
+      const [, tFrom, tTo] = SOLUTION[tStepIdx] || [];
+
+      // Eğer disk almamız (pick) gerekiyorsa alınacak kuleyi, yoksa bırakılacak kuleyi (place) parlak göster
+      const hiPeg = tPhase === 'pick' ? tFrom : tTo;
+
+      // 3 kule için de döngü çevirip çizelim
+      for (let pi = 0; pi < 3; pi++) {
+        const cx = pw * pi + pw / 2; // Kulenin merkez x koordinatı
+
+        // Bu kule parlaması gereken "Hedef" kule ise yere sarı bir gölge/ışık çiz
+        if (pi === hiPeg) {
+          tCtx.save();
+          tCtx.shadowColor = '#f59e0b';
+          tCtx.shadowBlur = 35;
+          tCtx.fillStyle = 'rgba(245,158,11,.18)';
+          tCtx.beginPath();
+          tCtx.ellipse(cx, by - 4, pw * .38, 16, 0, 0, Math.PI * 2);
+          tCtx.fill();
+          tCtx.restore();
+        }
+
+        // Eğer bu kule kullanıcının seçtiği kule ise yere yeşil bir gölge çiz
+        if (pi === tSelected) {
+          tCtx.save();
+          tCtx.shadowColor = '#10b981';
+          tCtx.shadowBlur = 30;
+          tCtx.fillStyle = 'rgba(16,185,129,.12)';
+          tCtx.beginPath();
+          tCtx.ellipse(cx, by - 4, pw * .38, 16, 0, 0, Math.PI * 2);
+          tCtx.fill();
+          tCtx.restore();
+        }
+
+        // Direkleri (Çubukları) çiz (Gradient ile 3D efekti)
+        const pg = tCtx.createLinearGradient(cx - pt / 2, 0, cx + pt / 2, 0);
+        // Hedefse morumsu, seçiliyse yeşil, normalse standart lila rengi
+        const lc = pi === hiPeg ? '#c084fc' : pi === tSelected ? '#34d399' : '#6d5ee0';
+        pg.addColorStop(0, '#3730a3');
+        pg.addColorStop(.5, lc);
+        pg.addColorStop(1, '#3730a3');
+
+        tCtx.fillStyle = pg;
+        tRR(tCtx, cx - pt / 2, pTopY, pt, ph, pt / 2);
+        tCtx.fill();
+
+        // Direğin en tepesini yuvarlak (arc) ile çiz
+        tCtx.save();
+        tCtx.shadowColor = pi === hiPeg ? '#f59e0b' : pi === tSelected ? '#10b981' : '#7c3aed';
+        tCtx.shadowBlur = 14;
+        tCtx.fillStyle = pi === hiPeg ? '#fbbf24' : pi === tSelected ? '#34d399' : '#a855f7';
+        tCtx.beginPath();
+        tCtx.arc(cx, pTopY + 4, pt * .7, 0, Math.PI * 2);
+        tCtx.fill();
+        tCtx.restore();
+
+        // Eğer bu kule hedefleniyorsa, üstünde zıplayan küçük bir uyarı oku (▼) göster
+        if (pi === hiPeg) {
+          const t2 = (Date.now() % 800) / 800; // Animasyon zamanını 0-1 arasına normalize et
+          const arY = pTopY - 16 - Math.sin(t2 * Math.PI * 2) * 5; // Sinüs dalgası ile zıplat
+
+          tCtx.save();
+          tCtx.fillStyle = `rgba(245,158,11,${0.7 + Math.sin(t2 * Math.PI * 2) * .3})`; // Yanıp sönme
+          tCtx.font = `bold ${Math.max(18, W * .035)}px Arial`;
+          tCtx.textAlign = 'center';
+          tCtx.fillText('▼', cx, arY);
+          tCtx.restore();
+        }
+
+        // Platformun üstüne kulenin ismini ('Sol', 'Orta', 'Sağ') yaz
+        tCtx.fillStyle = pi === hiPeg ? '#f59e0b' : pi === tSelected ? '#34d399' : 'rgba(148,163,184,.6)';
+        tCtx.font = `bold ${Math.max(11, W * .016)}px Outfit`;
+        tCtx.textAlign = 'center';
+        tCtx.fillText(PNAMES[pi], cx, by + bh * .65);
+
+        // O anki kuledeki diskleri aşağıdan yukarıya doğru çiz
+        tPegs[pi].forEach((sz, di) => {
+          const ratio = (sz - 1) / 2; // Diskin büyüklük oranı
+          const dw = mnDW + ratio * (mxDW - mnDW); // Diskin genişliğini hesapla
+          const dy = by - (di + 1) * (dh + 2); // Diskin Y (dikine) konumu
+          const [c1, c2] = TCOLS[(sz - 1) % 3]; // Disk rengini şablondan (TCOLS) al
+
+          tCtx.save();
+          // Eğer bu disk en üstteyse ve kullanıcı bu kuleyi seçtiyse diske parlama efekti ver
+          if (di === tPegs[pi].length - 1 && pi === tSelected) {
+            tCtx.shadowColor = c1;
+            tCtx.shadowBlur = 20;
+          }
+
+          // Disk için gradyan oluştur (3D silindir gibi görünmesini sağlar)
+          const g = tCtx.createLinearGradient(cx - dw / 2, dy, cx - dw / 2, dy + dh);
+          g.addColorStop(0, tLi(c1, 38));
+          g.addColorStop(.4, c1);
+          g.addColorStop(1, c2);
+
+          tCtx.fillStyle = g;
+          tRR(tCtx, cx - dw / 2, dy, dw, dh, dh / 2); // Diskin kendisini çiz
+          tCtx.fill();
+
+          // Diskin üst kısmındaki parlamayı (highlight) çiz
+          const sh = tCtx.createLinearGradient(cx - dw / 2, dy, cx - dw / 2, dy + dh * .5);
+          sh.addColorStop(0, 'rgba(255,255,255,.28)');
+          sh.addColorStop(1, 'rgba(255,255,255,0)');
+
+          tCtx.fillStyle = sh;
+          tRR(tCtx, cx - dw / 2 + dw * .07, dy + 2, dw * .86, dh * .46, dh * .23);
+          tCtx.fill();
+
+          // Diskin üzerine büyüklük numarasını yaz
+          tCtx.fillStyle = 'rgba(255,255,255,.9)';
+          tCtx.font = `bold ${Math.max(9, dh * .58)}px Outfit`;
+          tCtx.textAlign = 'center';
+          tCtx.fillText(sz, cx, dy + dh * .7);
+          tCtx.restore();
+        });
+      }
+    }
+
+    // Yardımcı fonskiyon: HEX rengi alıp, R G B değerlerini açarak ('a' kadar) daha açık bir renk verir
+    function tLi(hex, a) {
+      const r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+      return `rgb(${Math.min(255, r + a)},${Math.min(255, g + a)},${Math.min(255, b + a)})`;
+    }
+
+    // Yardımcı fonsyiyon: Canvas üstünde yuvarlatılmış köşeleri olan dikdörtgen (Rounded Rectangle) çizer
+    function tRR(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+
+    // Eğitim tuvaline (canvas) tıklama veya dokunma(touch) etkinliklerini dinle
+    tutCanvas.addEventListener('click', e => tTap(e.clientX, e.clientY));
+
+    // Mobilde dokunmayı dinle. passive:false sayesinde scroll yapmasını (kaymayı) önleriz
+    tutCanvas.addEventListener('touchend', e => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      tTap(t.clientX, t.clientY);
+    }, { passive: false });
+
+    // Kullanıcı bir kuleye tıkladığında çalışacak olan ana oyun mekaniği fonksiyonu
+    function tTap(cx, cy) {
+      if (tStepIdx >= SOLUTION.length) return; // Eğitim bittiyse tepki verme
+
+      const rect = tutCanvas.getBoundingClientRect(); // Canvas'in ekrandaki koordinatlarını al
+      // Tıklamanın Canvas üzerindeki yerini hesapla (Orantılayarak)
+      const x = (cx - rect.left) * (tutCanvas.width / rect.width);
+
+      // Canvas'ı 3'e bölerek hangi kuleye tıklandığını (0, 1 veya 2) bul
+      const peg = Math.min(2, Math.floor(x / (tutCanvas.width / 3)));
+
+      // Eğitimdeki hedefleri al (hangi disk, nereden nereye gitmeli?)
+      const [disk, cFrom, cTo] = SOLUTION[tStepIdx];
+      const fb = document.getElementById('feedback'); // Bildirim/geribildirim div'i
+
+      // 1. AŞAMA: DİSK SEÇME (PICK)
+      if (tPhase === 'pick') {
+        // Eğer kullanıcı yanlış (istenmeyen) kuleye dokunduysa uyar ve işlemi iptal et
+        if (peg !== cFrom) {
+          tFB(fb, 'Yanlış kule! Sarı parlayan kuleye dokun 👆', 'err');
+          return;
+        }
+
+        // Doğru kuleyse o kuleyi "seçili" (tSelected) olarak işaretle
+        tSelected = peg;
+        tPhase = 'place'; // Aşamayı "Bırakma (Place)" olarak değiştir
+
+        // Arayüzdeki yönerge metinlerini güncelle
+        tSetInstr(tStepIdx, 'place', disk, cFrom, cTo);
+        tFB(fb, '✅ Disk alındı! Şimdi hedef kuleye bırak', 'ok');
+
+        // 2. AŞAMA: DISKİ YENİ YERE BIRAKMA (PLACE)
+      } else {
+        // Eğer kullanıcı yanlış (hedef olmayan) kuleye dokunduysa uyar ve işlemi iptal et
+        if (peg !== cTo) {
+          tFB(fb, 'Yanlış! Sarı parlayan kuleye bırak 👆', 'err');
+          return;
+        }
+
+        // Gerçekten diski taşı: cFrom dizisinden pop ile çıkart, cTo dizisine push ile ekle
+        tPegs[cTo].push(tPegs[cFrom].pop());
+        tSelected = null; // Seçimi kaldır
+
+        // Adım göstergelerindeki daireyi (pill) "done" (tamamlandı) yap
+        document.getElementById('pill' + tStepIdx).className = 'pill done';
+
+        tStepIdx++; // Bir sonraki eğtim adımına geç
+        tPhase = 'pick'; // Yine "Disk Seçme" aşamasına dön
+
+        // Eğer tüm adımlar bittiyse (Eğitim tamamlandıysa)
+        if (tStepIdx >= SOLUTION.length) {
+          // Yarım saniye sonra eğitimi bitirme (Tebrikler) ekranını göster
+          setTimeout(() => document.getElementById('tutWin').classList.add('show'), 500);
+          return;
+        }
+
+        // Bitmediyse bir sonraki adımın yönergelerini ekrana yaz
+        tSetInstr(tStepIdx, 'pick', SOLUTION[tStepIdx][0], SOLUTION[tStepIdx][1], SOLUTION[tStepIdx][2]);
+        tFB(fb, 'Mükemmel! 🎉 Sıradaki hamle', 'ok');
+      }
+    }
+    // Kullanıcıya o anki hamlede (pick veya place) kulelerin üzerinde gösterilecek yönergeleri ayarlar
+    function tSetInstr(idx, ph, disk, from, to) {
+      // Örn: "ADIM 1 / 7"
+      document.getElementById('instrTitle').textContent = `ADIM ${idx + 1} / ${SOLUTION.length}`;
+
+      // Kullanıcının bulunduğu adımı (pill) aktif (parlak) yap
+      document.getElementById('pill' + idx).className = 'pill active';
+
+      if (ph === 'pick') { // Disk alma aşaması
+        document.getElementById('instrIcon').textContent = '👆';
+        document.getElementById('instrBody').textContent = `${PNAMES[from]} kuleye dokun`;
+        document.getElementById('instrSub').textContent = `Disk ${disk}'i oradan al`;
+      } else { // Disk bırakma aşaması
+        document.getElementById('instrIcon').textContent = '📦';
+        document.getElementById('instrBody').textContent = `${PNAMES[to]} kuleye bırak`;
+        document.getElementById('instrSub').textContent = `Disk ${disk}'i buraya koy`;
+      }
+    }
+
+    // Küçük bir bildirim (feedback) mesajı gösteren ve 2 saniye sonra otomatik kaybolan yardımcı fonksiyon
+    function tFB(el, msg, type) {
+      el.textContent = msg;
+      // class="feedback ok" veya "feedback err" (yeşil veya kırmızı)
+      el.className = 'feedback ' + type;
+
+      // Eğer önceden ayarlanmış bir kaybolma süresi (timeout) varsa iptal et
+      clearTimeout(el._t);
+
+      // 2000 milisaniye (2 sn) sonra mesajı temizle
+      el._t = setTimeout(() => {
+        el.textContent = '';
+        el.className = 'feedback';
+      }, 2000);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  ASIL OYUN (MEKANİKLER VE MANTIK)
+    // ══════════════════════════════════════════════════════════
+
+    const NUM_DISKS = 5; // Oyundaki toplam disk sayısı (Sabit)
+
+    // Oyun Durumu (State) Değişkenleri
+    let pegs = [[], [], []], // 3 kulenin (Sol, Orta, Sağ) barındırdığı disk dizileri
+      gSel = null,         // Şu an parmakla/fareyle seçili (havada tutulan) kulenin indeksi
+      moves = 0,           // Kullanıcının yaptığı hamle sayısı
+      gHistory = [],       // Geri alma (Undo) yapabilmek için hamle geçmişi
+      gameWon = false;     // Oyunun kazanılıp kazanılmadığını tutan bayrak
+
+    // Animasyon Durumu Değişkenleri
+    let animTick = 0,        // Çizim döngüsündeki (gLoop) kare sayacı (efektler için kullanılır)
+      gameFrame = null;    // requestAnimationFrame'in durdurulabilmesi için referans
+
+    // Kullanıcı Verileri ve Performans
+    let sessionData = null,  // Oyun sonu veya CSV'ye dışa aktarmak için toplanan tüm istatistikler
+      gameStart = 0,       // Oyunun başlama zamanı (milisaniye cinsinden Date.now())
+      lastMoveTime = 0,    // Reaksiyon süresini ölçebilmek için son hamlenin zamanı
+      errorCount = 0;      // Yapılan kural dışı hamle (büyük diski küçüğe koyma vb.) hatalarının sayısı
+
+    // Oyundaki 7 farklı disk için önceden belirlenmiş renk çiftleri (gradyanlar için [açık, koyu])
+    const DISK_COLORS = [
+      ['#f59e0b', '#d97706'], ['#ef4444', '#dc2626'], ['#3b82f6', '#2563eb'],
+      ['#10b981', '#059669'], ['#a855f7', '#9333ea'], ['#ec4899', '#db2777'],
+      ['#06b6d4', '#0891b2']
+    ];
+
+    const TAU = Math.PI * 2; // Çember hesaplamaları için tam tur radyan sabiti (2 * PI)
+
+    // Asıl oyun için kullanılan HTML Canvas öğesi ve onun 2D Çizim Bağlamı (Context)
+    const gc = document.getElementById('gameCanvas');
+    const gCtx = gc.getContext('2d');
+
+    // Ekran veya pencere boyutu değiştiğinde, oyun tuvalinin(canvas) çözünürlüğünü yeniden hesaplar
+    function resizeGameCanvas() {
+      // Ekran genişliğine sığdır, fakat en fazla 860px olsun
+      const w = Math.min(document.querySelector('.game-wrap').clientWidth - 24, 860);
+      gc.width = w;
+      gc.height = Math.round(w * 0.48); // Yüksekliği genişliğin %48'i yap (Orantılı kalsın)
+    }
+
+    // Tarayıcı boyutu değiştiğinde resizeGameCanvas'i otomatik çağır
+    window.addEventListener('resize', () => {
+      if (document.getElementById('sGame').classList.contains('active')) resizeGameCanvas();
+    });
+
+    // Oyunu başlatan veya tamamen sıfırlayan kurulum fonksiyonu
+    function initGame(keepTimer = false) {
+      // 3 kuleyi boşalt ve en sol kuleye [5, 4, 3, 2, 1] sırasıyla diskleri diz
+      pegs = [[], [], []];
+      for (let i = NUM_DISKS; i >= 1; i--) pegs[0].push(i);
+
+      // Tüm oyun değişkenlerini baştaki sıfır haline getir 
+      gSel = null;
+      moves = 0;
+      gHistory = [];
+      gameWon = false;
+      animTick = 0;
+      errorCount = 0;
+
+      if (!keepTimer) {
+        gameStart = Date.now();
+      }
+      lastMoveTime = Date.now();
+
+      // Oturum analiz verilerini oluştur
+      if (!keepTimer) {
+        sessionData = {
+          name: playerName,
+          gender: selectedGender,
+          playedBefore: hasPlayedBefore,
+          gameMode: timedMode ? 'sureli' : 'suresiz',
+          date: new Date().toISOString(),
+          numDisks: NUM_DISKS,
+          moves: [],
+          undos: [],
+          errors: []
+        };
+      } else if (sessionData) {
+        // Oturum devam ediyorsa sadece oyun hamlelerini temizle
+        sessionData.moves = [];
+        sessionData.undos = [];
+        sessionData.errors = [];
+      }
+
+      // Üst taraftaki "İpucu" (Hint) metnini başlangıç değerine ayarla
+      document.getElementById('hintBar').textContent = 'Bir kule seçerek disk al';
+      document.getElementById('hintBar').className = 'hint-bar';
+
+      // Eğer oyun döngüsü çalışmıyorsa başlat
+      if (!gameFrame) gLoop();
+    }
+
+    // Oyunu tamamen yeniden başlatan buton fonksiyonu
+    function resetGame(keepTimer = false) {
+      initGame(keepTimer);
+    }
+
+    // Oyun ekranının sürekli saniyede ~60 kez çalışan çizim fonksiyonu (Render Loop)
+    function gLoop() {
+      animTick++;
+      gDraw();
+      gameFrame = requestAnimationFrame(gLoop);
+    }
+
+    // Oyun tuvaline kuleleri ve diskleri çizen ana fonksiyon
+    function gDraw() {
+      const W = gc.width, H = gc.height;
+      gCtx.clearRect(0, 0, W, H); // Ekranı temizle
+
+      // Arka planı koyu renkli doğrusal gradyan ile boyar
+      const bg = gCtx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#1a1630');
+      bg.addColorStop(1, '#0f0c1a');
+      gCtx.fillStyle = bg;
+      gCtx.fillRect(0, 0, W, H);
+
+      // Çizim parametreleri (Genişlik, direk kalınlığı, alt platform, vb.)
+      const pw = W / 3, // Üç kule için ekranı 3 parçaya böl
+        bh = H * .09, // Taban platformu (yükseklik)
+        plW = Math.max(7, W * .012), // Direk (çubuk) kalınlığı
+        plH = H * .72, // Direk yüksekliği
+        baseY = H - bh; // Tabanın Y eksenindeki yeri
+
+      const maxDW = pw * .82, // En büyük diskin kaplayacağı genişlik
+        minDW = plW * 3.5, // En küçük diskin genişliği
+        // Diskin kalınlığını (yüksekliğini) toplam disk sayısına göre otomatik, dinamik ayarla
+        dH = Math.max(14, Math.min(28, (plH * .85) / (NUM_DISKS + 1)));
+
+      // Kulelerin oturduğu alt tabanı (stand) çiz
+      const bg2 = gCtx.createLinearGradient(0, baseY, 0, H);
+      bg2.addColorStop(0, '#2d2550');
+      bg2.addColorStop(1, '#1a1630');
+
+      gCtx.fillStyle = bg2;
+      gRR(gCtx, 20, baseY, W - 40, bh - 4, 10);
+      gCtx.fill();
+
+      gCtx.strokeStyle = 'rgba(124,58,237,.4)';
+      gCtx.lineWidth = 1.5;
+      gRR(gCtx, 20, baseY, W - 40, bh - 4, 10);
+      gCtx.stroke();
+
+      // 3 kuleyi ve içindeki diskleri çiz
+      for (let pi = 0; pi < 3; pi++) {
+        const cx = pw * pi + pw / 2; // Kulenin merkez X noktası
+        const pTop = baseY - plH; // Kulenin tepe noktası
+        const isSel = gSel === pi; // Kullanıcı bu kuleyi seçti mi (havada diski mi tutuyor?)
+
+        // Kule seçiliyse yere parlak turuncu/sarı bir ışık (gölge) vurmasını sağla
+        if (isSel) {
+          gCtx.save();
+          gCtx.shadowColor = '#f59e0b';
+          gCtx.shadowBlur = 30;
+          gCtx.fillStyle = 'rgba(245,158,11,.15)';
+          gCtx.beginPath();
+          gCtx.ellipse(cx, baseY - 5, pw * .38, 18, 0, 0, TAU);
+          gCtx.fill();
+          gCtx.restore();
+        }
+
+        // Direkleri 3D görünümlü (Gradient) olarak çiz
+        const pg = gCtx.createLinearGradient(cx - plW / 2, 0, cx + plW / 2, 0);
+        if (isSel) {
+          pg.addColorStop(0, '#d97706');
+          pg.addColorStop(.5, '#fbbf24');
+          pg.addColorStop(1, '#d97706');
+        } else {
+          pg.addColorStop(0, '#3730a3');
+          pg.addColorStop(.5, '#6d5ee0');
+          pg.addColorStop(1, '#3730a3');
+        }
+        gCtx.fillStyle = pg;
+        gRR(gCtx, cx - plW / 2, pTop, plW, plH, plW / 2);
+        gCtx.fill();
+
+        // Direklerin tepesindeki yuvarlak (Topuz)
+        gCtx.save();
+        gCtx.shadowColor = isSel ? '#f59e0b' : '#7c3aed';
+        gCtx.shadowBlur = 12;
+        gCtx.fillStyle = isSel ? '#fbbf24' : '#a855f7';
+        gCtx.beginPath();
+        gCtx.arc(cx, pTop + 4, plW * .7, 0, TAU);
+        gCtx.fill();
+        gCtx.restore();
+
+        // Kule etiketlerini (A, B, C harfleri) çiz
+        gCtx.fillStyle = isSel ? '#f59e0b' : 'rgba(148,163,184,.6)';
+        gCtx.font = `bold ${Math.max(12, W * .018)}px Outfit`;
+        gCtx.textAlign = 'center';
+        gCtx.fillText(['A', 'B', 'C'][pi], cx, baseY + bh * .65);
+
+        // Kuledeki sabit duran diskleri aşağıdan yukarı dizerek çiz
+        const stk = pegs[pi];
+        // Seçiliyse en üstteki diski ayır (havada tutulacak)
+        const top = isSel ? stk.length - 2 : stk.length - 1;
+
+        for (let di = 0; di <= top; di++) {
+          gDrawDisk(cx, baseY - (di + 1) * (dH + 2), stk[di], dH, maxDW, minDW, false);
+        }
+
+        // Seçili olan havaya kaldırılmış (havalanmış) diski çiz
+        if (isSel && stk.length > 0) {
+          const ts = stk[stk.length - 1]; // Tutulan disk (Dizinin en sonundaki, en üstteki)
+          const bob = Math.sin(animTick * .07) * 6; // Yavaşça yukarı-aşağı süzülme animasyonu
+          const sc = 1 + Math.sin(animTick * .07) * .03; // Kalp atışı gibi hafifçe büyüyüp küçülme
+          const fy = pTop - dH - 14 + bob; // Diskin havada duracağı Y noktası
+
+          gCtx.save();
+          // Canvas merkezini diskin merkezine taşı, büyültüp küçült ve eski yerine geri taşı
+          gCtx.translate(cx, fy + dH / 2);
+          gCtx.scale(sc, sc);
+          gCtx.translate(-cx, -(fy + dH / 2));
+
+          gDrawDisk(cx, fy, ts, dH, maxDW, minDW, true); // glow = true (parlamalı çiz)
+          gCtx.restore();
+        }
+      }
+    }
+    // Yardımcı: Diskin büyüklüğüne göre çizileceği genişliği verir
+    function gGetDW(sz, mx, mn) {
+      return mn + ((sz - 1) / (NUM_DISKS - 1)) * (mx - mn);
+    }
+
+    // Tek bir diski çizen fonksiyon  
+    function gDrawDisk(cx, dy, sz, dh, mx, mn, glow) {
+      const dw = gGetDW(sz, mx, mn);
+      const [c1, c2] = DISK_COLORS[(sz - 1) % DISK_COLORS.length]; // Diskin rengini al
+
+      gCtx.save();
+      // Havadaysa (glow) parlat
+      if (glow) {
+        gCtx.shadowColor = c1;
+        gCtx.shadowBlur = 28;
+      }
+
+      // Çizim işlemi
+      const g = gCtx.createLinearGradient(cx - dw / 2, dy, cx - dw / 2, dy + dh);
+      g.addColorStop(0, gLi(c1, 40));
+      g.addColorStop(.4, c1);
+      g.addColorStop(1, c2);
+
+      gCtx.fillStyle = g;
+      gRR(gCtx, cx - dw / 2, dy, dw, dh, dh / 2);
+      gCtx.fill();
+
+      const sh = gCtx.createLinearGradient(cx - dw / 2, dy, cx - dw / 2, dy + dh * .55);
+      sh.addColorStop(0, 'rgba(255,255,255,.3)');
+      sh.addColorStop(1, 'rgba(255,255,255,0)');
+
+      gCtx.fillStyle = sh;
+      gRR(gCtx, cx - dw / 2 + dw * .06, dy + 2, dw * .88, dh * .5, dh * .25);
+      gCtx.fill();
+
+      if (glow) {
+        gCtx.strokeStyle = 'rgba(245,158,11,.8)';
+        gCtx.lineWidth = 2;
+        gRR(gCtx, cx - dw / 2, dy, dw, dh, dh / 2);
+        gCtx.stroke();
+      }
+
+      gCtx.fillStyle = 'rgba(255,255,255,.88)';
+      gCtx.font = `bold ${Math.max(9, dh * .6)}px Outfit`;
+      gCtx.textAlign = 'center';
+      gCtx.fillText(sz, cx, dy + dh * .68);
+      gCtx.restore();
+    }
+
+    // Açık renk üretici ve Yuvarlak Köşeli Dikdörtgen çizen yardımcı asıl oyun alt-fonksiyonları
+    function gLi(hex, a) { const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgb(${Math.min(255, r + a)},${Math.min(255, g + a)},${Math.min(255, b + a)})`; }
+    function gRR(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath(); }
+
+    // Oyun oynarken (pc mouse ve mobil ekran) tıklama yakalayıcıları
+    gc.addEventListener('click', e => gTap(e.clientX, e.clientY));
+    gc.addEventListener('touchend', e => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      gTap(t.clientX, t.clientY);
+    }, { passive: false });
+
+    // Tıklamaların X eksenindeki konumuna göre hangi kulenin seçildiğini hesaplar
+    function gTap(cx, cy) {
+      if (gameWon) return; // Kazanıldıysa tıklamaları görmezden gel
+      const rect = gc.getBoundingClientRect();
+      // Mouse X eksenini 3'e böl (0, 1, 2 = Sol, Orta, Sağ peg'ler)
+      gSelectPeg(Math.min(2, Math.floor((cx - rect.left) * (gc.width / rect.width) / (gc.width / 3))));
+    }
+
+    // HANOİ KULELERİ ASIL OYUN KURALLARI VE MANTIĞI
+    function gSelectPeg(peg) {
+      const h = document.getElementById('hintBar');
+      const now = Date.now();
+
+      // 1. AŞAMA: ELİMİZDE HİÇ DİSK YOKSA (Pick aşaması)
+      if (gSel === null) {
+        // Tıkladığımız kulede hiç disk yoksa uyarı ver
+        if (!pegs[peg].length) {
+          errorCount++; // Hata sayısını artır
+          sessionData.errors.push({ tsMs: now - gameStart, phase: 'pick', attemptedPeg: peg });
+          gFlash(h, 'Bu kule boş! ❌');
+          return;
+        }
+
+        // Kuleyi seç, disk havaya kalksın
+        gSel = peg;
+        h.textContent = `Disk ${pegs[peg][pegs[peg].length - 1]} seçildi — hedef kuleye dokun`;
+        h.className = 'hint-bar sel';
+
+        // 2. AŞAMA: ELİMİZDE HAVA DA BİR DİSK VAR (Place aşaması)
+      } else {
+        // Eğer havaya kaldırdığın diski yine kendi kulesine basarsan secimi bırakır
+        if (peg === gSel) {
+          gSel = null;
+          h.textContent = 'Bir kule seçerek disk al';
+          h.className = 'hint-bar';
+          return;
+        }
+
+        // Taşıyacağımız (havadaki) disk ve gideceği yerdeki (alttaki) disk
+        const from = pegs[gSel][pegs[gSel].length - 1]; // Seçili kuledeki en son (en üst) eleman
+        const to = pegs[peg].length ? pegs[peg][pegs[peg].length - 1] : Infinity; // Boşsa sonsuz büyüklük kabul edilir
+
+        // HANOI KURALI: BÜYÜK DİSK, KÜÇÜK DİSKİN ÜZERİNE KONULAMAZ
+        if (from > to && !cheatMode) {
+          errorCount++;
+          sessionData.errors.push({ tsMs: now - gameStart, phase: 'place', fromPeg: gSel, toPeg: peg, disk: from });
+          gFlash(h, '❌ Büyük disk küçüğün üstüne konmaz!');
+          gSel = null; // Diski düşür, ceza ver
+          return;
+        }
+
+        // KURAL DIŞI DEĞİLSE HAMLEYİ GERÇEKLEŞTİR VE VERİLERİ KAYDET
+        const rt = now - lastMoveTime; // Düşünme-Hamle reaksiyon hızı (Milisaniye)
+        lastMoveTime = now;
+        moves++; // Hamle skorunu artır
+
+        // Oturum raporu (CSV) için log (günlük) kaydı
+        sessionData.moves.push({ n: moves, from: gSel, to: peg, disk: from, tsMs: now - gameStart, reactionMs: rt });
+
+        // Geri alma (Undo) yapabilmek için tahtanın şu anki kopyasını geçmiş listesine it(push) 
+        gHistory.push(JSON.parse(JSON.stringify(pegs)));
+
+        // ASIL YER DEĞİŞTİRME MANTIĞI: from dizisinden al, to dizisine ekle
+        pegs[peg].push(pegs[gSel].pop());
+
+        // Eli tekrar boşalt, İpucuyu sıfırla
+        gSel = null;
+        h.textContent = 'Bir kule seçerek disk al';
+        h.className = 'hint-bar';
+
+        // Acaba tüm diskler "Sağ" kuleye toplandı mı? Kontrol et
+        checkWin();
+      }
+    }
+
+    // Küçük hatalarda oyuncuyu uyaran yanıp sönen flaş mesajı (Flash message)
+    function gFlash(el, msg) {
+      el.textContent = msg;
+      el.style.color = '#ef4444';
+      setTimeout(() => {
+        el.textContent = 'Bir kule seçerek disk al';
+        el.style.color = '';
+        el.className = 'hint-bar';
+      }, 1600);
+    }
+
+    // "Geri Al" (Undo) tuşuna basıldığında
+    function undoMove() {
+      // Geçmiş boşsa geri alamayız
+      if (!gHistory.length) return;
+
+      // CSV Günlüğüne oyuncunun geri alma işlemi yaptığını not et
+      sessionData.undos.push({ n: moves, tsMs: Date.now() - gameStart });
+
+      // Geçmiş listesinden en sonki güvenli dizi halini(array state) alıp oyuna kopyala
+      pegs = gHistory.pop();
+      if (moves > 0) moves--; // Yapılan hamleyi sıfırla
+      gSel = null; // Havada disk varsa bırak
+
+      document.getElementById('hintBar').textContent = '↩ Geri alındı';
+    }
+
+    // Acaba kullanıcı oyunu kazandı mı diye kontrol eden fonksiyon
+    function checkWin() {
+      // Kazanma kuralı: 3. kuledeki (indeks 2) disk sayısı toplam disk sayısına eşit mi?
+      if (pegs[2].length !== NUM_DISKS) return;
+
+      gameWon = true; // Oyunu bitir (Tıklamaları durdur)
+      const now = Date.now();
+
+      // Oyun sonu istatistiklerini hesapla ve oturum verisine (sessionData) kaydet
+      sessionData.totalTimeMs = now - gameStart; // Toplam geçen süre (milisaniye)
+      sessionData.totalMoves = moves;            // Toplam yapılan hamle
+      sessionData.totalErrors = errorCount;      // Toplam kural dışı deneme (hata)
+
+      // Tarayıcının yerel hafızasından (localStorage) eski kayıtları al, yenisini ekle ve geri kaydet
+      const all = lsLoad();
+      all.push(sessionData);
+      lsSave(all);
+
+      // Oyuncu kazandığı an otomatik olarak arka planda CSV Excel dosyasını indir
+      autoDownloadCSV(sessionData);
+
+      // Yarım saniye (500 ms) bekleyip "Tebrikler" ekranını göster
+      setTimeout(showWin, 500);
+    }
+
+    // Kazanma (Tebrikler) penceresini ekranda gösterir
+    function showWin() {
+      // Ekrana oyuncunun adını yaz
+      document.getElementById('winSub').textContent = `${playerName}, harika iş çıkardın! 🎉`;
+
+      // Ekrandaki skor tablolarına değerleri yerleştir
+      document.getElementById('winMoves').textContent = moves;
+      document.getElementById('winTime').textContent = fmtT(Math.round(sessionData.totalTimeMs / 1000));
+      document.getElementById('winErrors').textContent = errorCount;
+
+      // Liderlik tablosunu (Scoreboard) oluştur
+      buildSB();
+      // Pencereyi görünür yap (CSS 'show' classı ekleyerek)
+      document.getElementById('winOverlay').classList.add('show');
+    }
+
+    // Kazanma penceresini kapatır (Çarpı tuşu veya "Tekrar oyna" vb.)
+    function closeWin() {
+      document.getElementById('winOverlay').classList.remove('show');
+    }
+
+    // Saniye cinsinden sayıyı "Dakika:Saniye" formatına (Örn: 01:25) çevirir
+    function fmtT(s) {
+      return `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+    }
+
+    // Skor Tablosunu (Scoreboard) hesaplayan ve HTML olarak ekrana basan fonksiyon
+    function buildSB() {
+      const all = lsLoad(); // Tüm oyun geçmişini getir
+
+      // Önce az hamle yapanları (moves), hamleleri eşitse az sürede bitirenleri (time) öne al (Sort)
+      // .slice(0, 10) ile sadece ilk 10 (En iyi 10) oyuncuyu al
+      const sorted = [...all].sort((a, b) => a.totalMoves - b.totalMoves || a.totalTimeMs - b.totalTimeMs).slice(0, 10);
+
+      const tbody = document.getElementById('sbBody');
+      tbody.innerHTML = ''; // Eski tabloyu temizle
+
+      // Her bir ilk 10 daki oyuncu için tabloya satır (tr) ekle
+      sorted.forEach((s, i) => {
+        // Eğer bu satırdaki kişi, şu an oynayan bizim hesapsa satırı farklı renkle boya (Highlighted)
+        const isMe = s.name === playerName && s.date === sessionData.date;
+
+        // İlk 3'e madalya emoji'si, geri kalanlara Sira Numarası (4, 5, 6...)
+        const medal = ['🥇', '🥈', '🥉'][i] || i + 1;
+
+        const tr = document.createElement('tr');
+        tr.className = 'sb-row' + (isMe ? ' me' : '');
+
+        // HTML Satırının içini diz (Sıra, İsim, Hamle Sayısı, Süre)
+        tr.innerHTML = `<td><span class="rank ${['gold', 'silver', 'bronze'][i] || ''}">${medal}</span>
+      <span style="font-weight:600;${isMe ? 'color:var(--accent2)' : ''}">${esc(s.name)}</span></td>
+      <td>${s.totalMoves}</td><td>${fmtT(Math.round(s.totalTimeMs / 1000))}</td>`;
+
+        tbody.appendChild(tr); // Hazırlanan satırı tabloya yapıştır
+      });
+    }
+
+    // Güvenlik (XSS Koruması): Kullanıcı isminde zararlı HTML kodları (<script>) olmasın diye filtreler
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Oyun bittiği anda verileri virgülle ayrılmış (CSV) metin dosyasına çevirip otomatik indiren fonksiyon
+    function autoDownloadCSV(s) {
+      const PEG = ['Sol(A)', 'Orta(B)', 'Sag(C)'], rows = [];
+
+      // 1. Kısım: GENEL ÖZET BİLGİLERİ
+      rows.push('HANOI - OTURUM RAPORU');
+      rows.push('Oyuncu,' + s.name);
+      rows.push('Cinsiyet,' + (s.gender || 'belirtmek_istemiyor'));
+      rows.push('Benzer_Oyun_Oynadi,' + (s.playedBefore ? 'Evet' : 'Hayir'));
+      rows.push('Oyun_Modu,' + (s.gameMode || 'suresiz'));
+      rows.push('Tarih,' + new Date(s.date).toLocaleString('tr-TR'));
+      rows.push('Toplam_Hamle,' + s.totalMoves);
+      rows.push('Sure_sn,' + (s.totalTimeMs / 1000).toFixed(1));
+      rows.push('Hata,' + s.totalErrors);
+      rows.push('Geri_Alma,' + (s.undos || []).length);
+      rows.push(''); // Boş satır
+
+      // 2. Kısım: HER HAMLENİN ZAMAN ÇİZELGESİ (Ayrıntılı döküm)
+      rows.push('Hamle_No,Diskten,Diske,Disk_No,Sure_ms,Reaksiyon_ms');
+      (s.moves || []).forEach(m =>
+        rows.push([m.n, PEG[m.from], PEG[m.to], m.disk, m.tsMs, m.reactionMs].join(','))
+      );
+
+      // 3. Kısım: YAPILAN HATALARIN DETAYLARI
+      if ((s.errors || []).length) {
+        rows.push('');
+        rows.push('HATALAR - Sure_ms,Asama,Kule,Disk');
+        s.errors.forEach(e =>
+          rows.push([
+            e.tsMs,
+            e.phase === 'pick' ? 'Al' : 'Birak', // Kullanıcı alırken mi bırakırken mi hata yaptı?
+            e.phase === 'pick' ? PEG[e.attemptedPeg] : `${PEG[e.fromPeg || 0]}->${PEG[e.toPeg || 0]}`,
+            e.disk || '-'
+          ].join(','))
+        );
+      }
+
+      // Dosya adını benzersiz yapmak için (OyuncuAdi_Tarih_RastgeleHarfler.csv) ayarla
+      const ts = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      const rid = Math.random().toString(36).slice(2, 6);
+
+      // Tarayıcı üzerinden otomatik bilgisayara indir (Blob API)
+      dl(new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `hanoi_${s.name}_${ts}_${rid}.csv`);
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  EXPORT (Dışa Aktarma) - MENÜDEKİ GİZLİ VERİ İNDİRME EKRANI
+    // ══════════════════════════════════════════════════════════
+
+    // Veri İndirme Modal Pencersini açar
+    function openExport() {
+      const all = lsLoad(); // Kayıttaki tüm oturumları veritabanından(LocalStorage) çek
+      document.getElementById('exportInfo').innerHTML = `<b>${all.length}</b> oturum &nbsp;|&nbsp; Toplam hamle: <b>${all.reduce((a, s) => a + (s.totalMoves || 0), 0)}</b>`;
+      document.getElementById('exportModal').classList.add('show');
+    }
+
+    // Verileri Ham JSON formatında indirir (Programcılar için)
+    function dlJSON() {
+      dl(new Blob([JSON.stringify(lsLoad(), null, 2)], { type: 'application/json' }), 'hanoi_data.json');
+    }
+
+    // Verileri toplu şekilde Excel'de açılabilecek (CSV) formatında indirir (Akademik Analiz için)
+    function dlCSV() {
+      const all = lsLoad(), PEG = ['Sol(A)', 'Orta(B)', 'Sag(C)'], rows = [];
+
+      // Tümü için Genel İstatistikler
+      rows.push('Sira,Oyuncu,Cinsiyet,Benzer_Oyun_Oynadi,Oyun_Modu,Toplam_Hamle,Sure_sn,Hata,Geri_Alma,Tarih');
+
+      // En iyi oynayanlara göre sıralayıp CSV'ye basar
+      [...all].sort((a, b) => a.totalMoves - b.totalMoves || a.totalTimeMs - b.totalTimeMs)
+        .forEach((s, i) => rows.push([i + 1, s.name, s.gender || 'belirtmek_istemiyor', s.playedBefore ? 'Evet' : 'Hayir', s.gameMode || 'suresiz', s.totalMoves, (s.totalTimeMs / 1000).toFixed(1), s.totalErrors, (s.undos || []).length, s.date].join(',')));
+
+      rows.push('');
+      rows.push('Oyuncu,Tarih,Hamle_No,Diskten,Diske,Disk_No,Sure_ms,Reaksiyon_ms');
+
+      // Tüm oyuncuların teker teker tüm hamlelerini birleştirip basar
+      all.forEach(s => (s.moves || []).forEach(m => rows.push([s.name, s.date, m.n, PEG[m.from], PEG[m.to], m.disk, m.tsMs, m.reactionMs].join(','))));
+
+      // '\uFEFF' karakteri Excelin Türkçe harfleri (UTF-8) bozmasını engeller (BOM)
+      dl(new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'hanoi_kayitlar.csv');
+    }
+
+    // Tarayıcının belleğinde geçici bir link oluşturup dosyayı otomatik tıklatarak indiren Fonksiyon
+    function dl(blob, name) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Tarayıcıdaki tüm oyunları tamamen silen 'Tehlikeli' fonksiyon  
+    function clearData() {
+      // Silmeden önce kullanıcıdan onay (Confirm) ister
+      if (confirm('Tüm veriler silinecek?')) {
+        localStorage.removeItem(LS_KEY); // Siler
+        document.getElementById('exportInfo').textContent = 'Silindi.';
+      }
+    }
+  </script>
+</body>
+
+</html>
